@@ -1,8 +1,9 @@
 import sys
 import pygame
 
+from bullet import Bullet
 
-def check_events(ship):
+def check_events(ai_settings, screen, ship, bullets):
     """Обрабатывает нажатия клавиш и события мыши."""
 
     for event in pygame.event.get():
@@ -11,27 +12,44 @@ def check_events(ship):
             sys.exit()
 
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
-                ship.moving_right = True
-            elif event.key == pygame.K_LEFT:
-                ship.moving_left = True
-
+            check_keydown_events(event, ai_settings, screen, ship, bullets)
+            
         elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_RIGHT:
-                ship.moving_right = False
-            elif event.key == pygame.K_LEFT:
-                ship.moving_left = False
+            check_keyup_event(event, ship)
 
-                # Переместить корабль вправо
-                ship.rect.centerx += 1
-
-
-def update_screen(ai_settings, screen, ship):
+def update_screen(ai_settings, screen, ship, bullets):
     """Обновляет изображение на экране и отображает новый экран."""
 
     # При каждом проходе цикла перерисовывается экран.
     screen.fill(ai_settings.bg_color)
     ship.blitme()
 
+    # Все пули выводяться позади изображения корабля и пришельцев.
+    for bullet in bullets.sprites():
+        bullet.draw_bullet()
+
     # Отображение последнего прорисованного экрана.
     pygame.display.flip()
+
+def check_keydown_events(event, ai_settings, screen, ship, bullets):
+    """Реагирует на нажатие клавиш."""
+
+    if event.key == pygame.K_RIGHT:
+        ship.moving_right = True
+    
+    elif event.key == pygame.K_LEFT:
+        ship.moving_left = True
+
+    elif event.key == pygame.K_SPACE:
+        #Создание новой пули и включение ее в группу bullet.
+        new_bullet = Bullet(ai_settings, screen, ship)
+        bullets.add(new_bullet)
+
+def check_keyup_event(event, ship):
+    """Реагирует на отпускание клавишь."""
+
+    if event.key == pygame.K_RIGHT:
+        ship.moving_right = False
+
+    elif event.key == pygame.K_LEFT:
+        ship.moving_left = False
